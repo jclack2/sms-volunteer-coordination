@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Login - SMS Volunteer Coordination{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">Login</h2>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="phone_number" class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" id="phone_number" name="phone_number"
+                               placeholder="+1234567890" required>
+                        <div class="form-text">Include country code (e.g., +1 for US)</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                </form>
+            </div>
+        </div>
+        <p class="text-center mt-3 text-muted">
+            <small>For AA volunteer coordination only. Trusted users only.</small>
+        </p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Invite Volunteers - {{ event.title }}{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Invite Volunteers</h1>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <h5>{{ event.title }}</h5>
+        <p class="text-muted mb-0">{{ event.event_datetime.strftime('%B %d, %Y at %I:%M %p') }} - {{ event.location }}</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            <p class="text-muted">Select volunteers to invite. They will receive an SMS invitation.</p>
+
+            {% if available_users %}
+            <div class="mb-3">
+                {% for user in available_users %}
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="users" value="{{ user.id }}"
+                           id="user{{ user.id }}"
+                           {% if user.id in invited_user_ids %}disabled checked{% endif %}>
+                    <label class="form-check-label" for="user{{ user.id }}">
+                        {{ user.name }} ({{ user.phone_number[-4:] }})
+                        {% if user.id in invited_user_ids %}
+                        <span class="badge bg-secondary">Already invited</span>
+                        {% endif %}
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a href="{{ url_for('events.view_event', event_id=event.id) }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Send Invitations</button>
+            </div>
+            {% else %}
+            <p class="text-muted">No opted-in users available to invite.</p>
+            <a href="{{ url_for('events.view_event', event_id=event.id) }}" class="btn btn-secondary">Back</a>
+            {% endif %}
+        </form>
+    </div>
+</div>
+{% endblock %}

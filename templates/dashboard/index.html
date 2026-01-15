@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Dashboard</h1>
+
+{% if current_user.is_admin or current_user.is_sender %}
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Total Events</h5>
+                <p class="display-6">{{ stats.total_events }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Active Events</h5>
+                <p class="display-6">{{ stats.active_events }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Opted-In Users</h5>
+                <p class="display-6">{{ stats.opted_in_users }}/{{ stats.total_users }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Messages (7d)</h5>
+                <p class="display-6">{{ stats.recent_messages }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Upcoming Events</h5>
+                {% if current_user.is_admin %}
+                <a href="{{ url_for('events.create_event') }}" class="btn btn-sm btn-primary">Create Event</a>
+                {% endif %}
+            </div>
+            <div class="list-group list-group-flush">
+                {% if upcoming_events %}
+                    {% for event in upcoming_events %}
+                    <a href="{{ url_for('events.view_event', event_id=event.id) }}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ event.title }}</h6>
+                            <small>{{ event.event_datetime.strftime('%b %d, %I:%M %p') }}</small>
+                        </div>
+                        <p class="mb-1 text-muted small">{{ event.location }}</p>
+                    </a>
+                    {% endfor %}
+                {% else %}
+                    <div class="list-group-item text-muted">No upcoming events</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Recent Responses</h5>
+            </div>
+            <div class="list-group list-group-flush">
+                {% if recent_responses %}
+                    {% for response in recent_responses[:5] %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ response.volunteer.name }}</h6>
+                            <span class="badge
+                                {% if response.parsed_response == 'YES' %}bg-success
+                                {% elif response.parsed_response == 'NO' %}bg-danger
+                                {% else %}bg-warning{% endif %}">
+                                {{ response.parsed_response }}
+                            </span>
+                        </div>
+                        <p class="mb-1 small text-muted">{{ response.event.title }}</p>
+                        <small class="text-muted">{{ response.responded_at.strftime('%b %d, %I:%M %p') }}</small>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="list-group-item text-muted">No recent responses</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info">
+    <h4>Welcome, {{ current_user.name }}!</h4>
+    <p>You can receive volunteer coordination messages via SMS. Reply to messages to indicate your availability.</p>
+    <p><strong>SMS Commands:</strong></p>
+    <ul>
+        <li><code>STATUS</code> - Check your current volunteer status</li>
+        <li><code>CANCEL</code> - Cancel your volunteer commitment</li>
+        <li><code>STOP</code> - Unsubscribe from all messages</li>
+    </ul>
+</div>
+{% endif %}
+{% endblock %}

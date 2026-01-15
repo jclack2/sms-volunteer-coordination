@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}{{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>{{ event.title }}</h1>
+    <a href="{{ url_for('events.list_events') }}" class="btn btn-secondary">Back to Events</a>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Event Details</h5>
+                <dl class="row mb-0">
+                    <dt class="col-sm-3">Date/Time:</dt>
+                    <dd class="col-sm-9">{{ event.event_datetime.strftime('%B %d, %Y at %I:%M %p') }}</dd>
+
+                    <dt class="col-sm-3">Location:</dt>
+                    <dd class="col-sm-9">{{ event.location }}</dd>
+
+                    <dt class="col-sm-3">Description:</dt>
+                    <dd class="col-sm-9">{{ event.description }}</dd>
+
+                    <dt class="col-sm-3">Signup Cutoff:</dt>
+                    <dd class="col-sm-9">{{ event.signup_cutoff.strftime('%B %d, %Y at %I:%M %p') }}</dd>
+
+                    <dt class="col-sm-3">Max Volunteers:</dt>
+                    <dd class="col-sm-9">{{ event.max_volunteers if event.max_volunteers else 'Unlimited' }}</dd>
+
+                    <dt class="col-sm-3">Organizer:</dt>
+                    <dd class="col-sm-9">{{ event.admin.name }}</dd>
+
+                    <dt class="col-sm-3">Sender:</dt>
+                    <dd class="col-sm-9">{{ event.sender.name }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Actions</h5>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('events.invite_volunteers', event_id=event.id) }}" class="btn btn-primary">
+                        Invite Volunteers
+                    </a>
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#selectModal"
+                            {% if not responses %}disabled{% endif %}>
+                        Select Volunteers
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Volunteer Responses ({{ responses|length }})</h5>
+    </div>
+    <div class="card-body">
+        {% if responses %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Response</th>
+                        <th>Raw Reply</th>
+                        <th>Status</th>
+                        <th>Responded At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for response in responses %}
+                    <tr>
+                        <td>{{ response.volunteer.name }}</td>
+                        <td>{{ response.volunteer.phone_number[-4:] }}</td>
+                        <td>
+                            <span class="badge
+                                {% if response.parsed_response == 'YES' %}bg-success
+                                {% elif response.parsed_response == 'NO' %}bg-danger
+                                {% else %}bg-warning{% endif %}">
+                                {{ response.parsed_response }}
+                            </span>
+                            {% if response.requires_review %}
+                            <span class="badge bg-info">Review</span>
+                            {% endif %}
+                        </td>
+                        <td><small>{{ response.raw_response }}</small></td>
+                        <td>
+                            <span class="badge
+                                {% if response.status == 'selected' %}bg-success
+                                {% elif response.status == 'not_selected' %}bg-secondary
+                                {% elif response.status == 'cancelled' %}bg-danger
+                                {% else %}bg-warning{% endif %}">
+                                {{ response.status }}
+                            </span>
+                        </td>
+                        <td>{{ response.responded_at.strftime('%b %d, %I:%M %p') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">No responses yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Selection Modal -->
+<div class="modal fade" id="selectModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Select Volunteers</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="selectionForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Select Volunteers:</label>
+                        {% for response in responses if response.parsed_response == 'YES' %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="volunteers"
+                                   value="{{ response.user_id }}" id="user{{ response.user_id }}"
+                                   {% if response.status == 'selected' %}checked{% endif %}>
+                            <label class="form-check-label" for="user{{ response.user_id }}">
+                                {{ response.volunteer.name }}
+                                {% if response.requires_review %}
+                                <span class="badge bg-warning">Review: {{ response.raw_response }}</span>
+                                {% endif %}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="sendSelectedMsg">
+                            <label class="form-check-label" for="sendSelectedMsg">
+                                Send message to selected volunteers
+                            </label>
+                        </div>
+                        <textarea class="form-control mt-2" id="selectedMessage" rows="3"
+                                  placeholder="Message for selected volunteers..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="sendEveryoneMsg">
+                            <label class="form-check-label" for="sendEveryoneMsg">
+                                Send message to everyone
+                            </label>
+                        </div>
+                        <textarea class="form-control mt-2" id="everyoneMessage" rows="3"
+                                  placeholder="Message for all invited volunteers..."></textarea>
+
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" id="includeNames">
+                            <label class="form-check-label" for="includeNames">Include selected volunteer names</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="includePhone">
+                            <label class="form-check-label" for="includePhone">Include phone last 4 digits</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitSelection()">Save Selection</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function submitSelection() {
+    const selectedUsers = Array.from(document.querySelectorAll('input[name="volunteers"]:checked'))
+        .map(cb => parseInt(cb.value));
+
+    const data = {
+        selected_users: selectedUsers,
+        send_selected_msg: document.getElementById('sendSelectedMsg').checked,
+        send_everyone_msg: document.getElementById('sendEveryoneMsg').checked,
+        selected_message: document.getElementById('selectedMessage').value,
+        everyone_message: document.getElementById('everyoneMessage').value,
+        include_names: document.getElementById('includeNames').checked,
+        include_phone: document.getElementById('includePhone').checked
+    };
+
+    fetch('{{ url_for("events.select_volunteers", event_id=event.id) }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error);
+    });
+}
+</script>
+{% endblock %}

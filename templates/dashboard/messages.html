@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Messages{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Message Log</h1>
+
+{% if messages %}
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-sm mb-0">
+            <thead>
+                <tr>
+                    <th>Direction</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Type</th>
+                    <th>Body</th>
+                    <th>Status</th>
+                    <th>Sent At</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for msg in messages %}
+                <tr>
+                    <td>
+                        <span class="badge
+                            {% if msg.direction == 'inbound' %}bg-info
+                            {% else %}bg-primary{% endif %}">
+                            {{ msg.direction }}
+                        </span>
+                    </td>
+                    <td><small>{{ msg.from_number[-4:] }}</small></td>
+                    <td><small>{{ msg.to_number[-4:] }}</small></td>
+                    <td><small>{{ msg.message_type or '-' }}</small></td>
+                    <td><small>{{ msg.body[:50] }}{% if msg.body|length > 50 %}...{% endif %}</small></td>
+                    <td>
+                        <span class="badge
+                            {% if msg.status == 'delivered' or msg.status == 'received' %}bg-success
+                            {% elif msg.status == 'failed' %}bg-danger
+                            {% else %}bg-warning{% endif %}">
+                            {{ msg.status }}
+                        </span>
+                    </td>
+                    <td><small>{{ msg.sent_at.strftime('%b %d, %I:%M %p') }}</small></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info">No messages yet.</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Audit Log{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Audit Log</h1>
+
+{% if logs %}
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-sm mb-0">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Details</th>
+                    <th>Event</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td><small>{{ log.created_at.strftime('%b %d, %I:%M %p') }}</small></td>
+                    <td>{{ log.user.name if log.user else '-' }}</td>
+                    <td><span class="badge bg-info">{{ log.action }}</span></td>
+                    <td><small>{{ log.details }}</small></td>
+                    <td>{{ log.event.title if log.event else '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info">No audit logs yet.</div>
+{% endif %}
+{% endblock %}

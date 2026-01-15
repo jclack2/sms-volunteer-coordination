@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Create Event{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <h1 class="mb-4">Create Event</h1>
+
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Event Title *</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description *</label>
+                        <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="location" class="form-label">Location *</label>
+                        <input type="text" class="form-control" id="location" name="location" required>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="event_datetime" class="form-label">Event Date/Time *</label>
+                            <input type="datetime-local" class="form-control" id="event_datetime" name="event_datetime" required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="signup_cutoff" class="form-label">Signup Cutoff *</label>
+                            <input type="datetime-local" class="form-control" id="signup_cutoff" name="signup_cutoff" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="max_volunteers" class="form-label">Max Volunteers</label>
+                            <input type="number" class="form-control" id="max_volunteers" name="max_volunteers"
+                                   placeholder="Leave empty for unlimited">
+                            <div class="form-text">Leave empty for unlimited volunteers</div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="sender_id" class="form-label">Sender *</label>
+                            <select class="form-select" id="sender_id" name="sender_id" required>
+                                {% for sender in senders %}
+                                <option value="{{ sender.id }}" {% if sender.id == current_user.id %}selected{% endif %}>
+                                    {{ sender.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Custom Response Strings (Optional)</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <input type="text" class="form-control" name="custom_yes_strings"
+                                       placeholder="Custom YES phrases (comma-separated)">
+                                <div class="form-text">e.g., "I'll be there,count me in"</div>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" class="form-control" name="custom_no_strings"
+                                       placeholder="Custom NO phrases (comma-separated)">
+                                <div class="form-text">e.g., "can't make it,busy"</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('events.list_events') }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Create Event</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

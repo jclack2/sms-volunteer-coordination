@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Users{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Users</h1>
+    <a href="{{ url_for('auth.register_user') }}" class="btn btn-primary">Add User</a>
+</div>
+
+{% if users %}
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Roles</th>
+                    <th>Opt-In Status</th>
+                    <th>Joined</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.name }}</td>
+                    <td>{{ user.phone_number }}</td>
+                    <td>
+                        {% if user.is_admin %}<span class="badge bg-danger">Admin</span>{% endif %}
+                        {% if user.is_sender %}<span class="badge bg-primary">Sender</span>{% endif %}
+                        {% if user.is_receiver %}<span class="badge bg-success">Receiver</span>{% endif %}
+                    </td>
+                    <td>
+                        {% if user.opt_in_confirmed %}
+                        <span class="badge bg-success">Opted In</span>
+                        {% elif user.opt_in_pending %}
+                        <span class="badge bg-warning">Pending</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Not Opted In</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ user.created_at.strftime('%b %d, %Y') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info">
+    No users yet. <a href="{{ url_for('auth.register_user') }}">Add your first user</a>
+</div>
+{% endif %}
+{% endblock %}
