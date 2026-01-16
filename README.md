@@ -1,6 +1,6 @@
 # SMS Volunteer Coordination
 
-A lightweight web application for coordinating volunteers via SMS messaging. Designed for hyper-local, trusted communities (e.g., AA groups) with a focus on simplicity and privacy.
+A lightweight web application for coordinating volunteers via SMS messaging. Designed for hyper-local, trusted communities (e.g., volunteer groups) with a focus on simplicity and privacy.
 
 ## Overview
 
