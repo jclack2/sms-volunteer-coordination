@@ -30,7 +30,7 @@ class User(UserMixin, db.Model):
     # Relationships
     sent_messages = db.relationship('SMSMessage', foreign_keys='SMSMessage.sender_id', backref='sender', lazy=True)
     received_messages = db.relationship('SMSMessage', foreign_keys='SMSMessage.receiver_id', backref='receiver', lazy=True)
-    volunteer_responses = db.relationship('VolunteerResponse', backref='volunteer', lazy=True)
+    volunteer_responses = db.relationship('VolunteerResponse', foreign_keys='VolunteerResponse.user_id', backref='volunteer', lazy=True, cascade='all, delete-orphan')
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -74,7 +74,7 @@ class Event(db.Model):
     # Relationships
     admin = db.relationship('User', foreign_keys=[admin_id], backref='administered_events')
     sender = db.relationship('User', foreign_keys=[sender_id], backref='managed_events')
-    volunteer_responses = db.relationship('VolunteerResponse', backref='event', lazy=True, cascade='all, delete-orphan')
+    volunteer_responses = db.relationship('VolunteerResponse', foreign_keys='VolunteerResponse.event_id', backref='event', lazy=True, cascade='all, delete-orphan')
     invited_users = db.relationship('EventInvitation', backref='event', lazy=True, cascade='all, delete-orphan')
 
     def __repr__(self):
